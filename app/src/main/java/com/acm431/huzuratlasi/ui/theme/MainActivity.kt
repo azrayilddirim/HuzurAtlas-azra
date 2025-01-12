@@ -80,6 +80,14 @@ import com.acm431.huzuratlasi.repository.AppRepository
 import com.acm431.huzuratlasi.viewmodel.AppViewModel
 import com.acm431.huzuratlasi.viewmodel.AppViewModelFactory
 import androidx.lifecycle.ViewModelProvider
+import androidx.compose.animation.*
+import androidx.compose.animation.core.*
+import androidx.compose.runtime.*
+import androidx.navigation.compose.*
+import com.google.accompanist.navigation.animation.AnimatedNavHost
+import com.google.accompanist.navigation.animation.composable
+import com.google.accompanist.navigation.animation.rememberAnimatedNavController
+import androidx.navigation.NavGraph.Companion.findStartDestination
 
 @OptIn(ExperimentalMaterial3Api::class)
 class MainActivity : ComponentActivity() {
@@ -131,25 +139,90 @@ fun MedicineScreen(navController: NavHostController, viewModel: AppViewModel) {
     }
 }
 
+@OptIn(ExperimentalAnimationApi::class)
 @Composable
 fun MainScreen(isOnboardingSeen: Boolean, appViewModel: AppViewModel) {
-    val navController = rememberNavController()
-    val systemUiController = rememberSystemUiController()
-
+    val navController = rememberAnimatedNavController()
+    
     Column(modifier = Modifier.fillMaxSize()) {
-        NavHost(
+        AnimatedNavHost(
             navController = navController,
             startDestination = if (isOnboardingSeen) "login" else "onboarding1"
         ) {
-            composable("onboarding1") { Onboarding1(navController) }
-            composable("onboarding2") { Onboarding2(navController) }
-            composable("login") { LoginPage(navController, appViewModel) }
-            composable("register") { RegisterScreen(navController, appViewModel) }
-            composable("home") { HomeScreen(navController, appViewModel) }
-            composable("medicine") { MedicineScreen(navController, appViewModel) }
-            composable("emergency") { EmergencyScreen(navController) }
-            composable("news") { NewsScreen(navController) }
-            composable("profile") { ProfileScreen(navController) }
+            // Onboarding screens
+            composable(
+                route = "onboarding1",
+                enterTransition = { slideInHorizontally(initialOffsetX = { 1000 }) },
+                exitTransition = { slideOutHorizontally(targetOffsetX = { -1000 }) },
+                popEnterTransition = { slideInHorizontally(initialOffsetX = { -1000 }) },
+                popExitTransition = { slideOutHorizontally(targetOffsetX = { 1000 }) }
+            ) { Onboarding1(navController) }
+            
+            composable(
+                route = "onboarding2",
+                enterTransition = { slideInHorizontally(initialOffsetX = { 1000 }) },
+                exitTransition = { slideOutHorizontally(targetOffsetX = { -1000 }) },
+                popEnterTransition = { slideInHorizontally(initialOffsetX = { -1000 }) },
+                popExitTransition = { slideOutHorizontally(targetOffsetX = { 1000 }) }
+            ) { Onboarding2(navController) }
+
+            // Auth screens
+            composable(
+                route = "login",
+                enterTransition = { slideInHorizontally(initialOffsetX = { 1000 }) },
+                exitTransition = { slideOutHorizontally(targetOffsetX = { -1000 }) },
+                popEnterTransition = { slideInHorizontally(initialOffsetX = { -1000 }) },
+                popExitTransition = { slideOutHorizontally(targetOffsetX = { 1000 }) }
+            ) { LoginPage(navController, appViewModel) }
+
+            composable(
+                route = "register",
+                enterTransition = { slideInHorizontally(initialOffsetX = { 1000 }) },
+                exitTransition = { slideOutHorizontally(targetOffsetX = { -1000 }) },
+                popEnterTransition = { slideInHorizontally(initialOffsetX = { -1000 }) },
+                popExitTransition = { slideOutHorizontally(targetOffsetX = { 1000 }) }
+            ) { RegisterScreen(navController, appViewModel) }
+
+            // Main app screens
+            composable(
+                route = "home",
+                enterTransition = { slideInHorizontally(initialOffsetX = { 1000 }) },
+                exitTransition = { slideOutHorizontally(targetOffsetX = { -1000 }) },
+                popEnterTransition = { slideInHorizontally(initialOffsetX = { -1000 }) },
+                popExitTransition = { slideOutHorizontally(targetOffsetX = { 1000 }) }
+            ) { HomeScreen(navController, appViewModel) }
+
+            composable(
+                route = "medicine",
+                enterTransition = { slideInHorizontally(initialOffsetX = { 1000 }) },
+                exitTransition = { slideOutHorizontally(targetOffsetX = { -1000 }) },
+                popEnterTransition = { slideInHorizontally(initialOffsetX = { -1000 }) },
+                popExitTransition = { slideOutHorizontally(targetOffsetX = { 1000 }) }
+            ) { MedicineScreen(navController, appViewModel) }
+
+            composable(
+                route = "emergency",
+                enterTransition = { slideInHorizontally(initialOffsetX = { 1000 }) },
+                exitTransition = { slideOutHorizontally(targetOffsetX = { -1000 }) },
+                popEnterTransition = { slideInHorizontally(initialOffsetX = { -1000 }) },
+                popExitTransition = { slideOutHorizontally(targetOffsetX = { 1000 }) }
+            ) { EmergencyScreen(navController) }
+
+            composable(
+                route = "news",
+                enterTransition = { slideInHorizontally(initialOffsetX = { 1000 }) },
+                exitTransition = { slideOutHorizontally(targetOffsetX = { -1000 }) },
+                popEnterTransition = { slideInHorizontally(initialOffsetX = { -1000 }) },
+                popExitTransition = { slideOutHorizontally(targetOffsetX = { 1000 }) }
+            ) { NewsScreen(navController) }
+
+            composable(
+                route = "profile",
+                enterTransition = { slideInHorizontally(initialOffsetX = { 1000 }) },
+                exitTransition = { slideOutHorizontally(targetOffsetX = { -1000 }) },
+                popEnterTransition = { slideInHorizontally(initialOffsetX = { -1000 }) },
+                popExitTransition = { slideOutHorizontally(targetOffsetX = { 1000 }) }
+            ) { ProfileScreen(navController, appViewModel) }
         }
     }
 }
@@ -157,19 +230,32 @@ fun MainScreen(isOnboardingSeen: Boolean, appViewModel: AppViewModel) {
 @Composable
 fun BottomNavigationBar(navController: NavHostController, currentRoute: String?) {
     NavigationBar {
-        NavigationBarItem(
-            icon = { Icon(Icons.Default.Home, contentDescription = "Home") },
-            label = { Text("Ana Sayfa") },
-            selected = currentRoute == "home",
-            onClick = { navController.navigate("home") }
+        val items = listOf(
+            BottomNavItem.Home,
+            BottomNavItem.Medicine,
+            BottomNavItem.Emergency,
+            BottomNavItem.News,
+            BottomNavItem.Profile
         )
-        NavigationBarItem(
-            icon = { Icon(Icons.Default.Article, contentDescription = "News") },
-            label = { Text("Haberler") },
-            selected = currentRoute == "news",
-            onClick = { navController.navigate("news") }
-        )
-        // Other navigation items...
+
+        items.forEach { item ->
+            NavigationBarItem(
+                icon = { Icon(item.icon, contentDescription = item.label) },
+                label = { Text(item.label) },
+                selected = currentRoute == item.route,
+                onClick = {
+                    if (currentRoute != item.route) {
+                        navController.navigate(item.route) {
+                            popUpTo(navController.graph.startDestinationId) {
+                                saveState = true
+                            }
+                            launchSingleTop = true
+                            restoreState = true
+                        }
+                    }
+                }
+            )
+        }
     }
 }
 

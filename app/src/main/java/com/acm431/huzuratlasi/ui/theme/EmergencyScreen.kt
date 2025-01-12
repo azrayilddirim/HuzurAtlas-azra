@@ -1,5 +1,8 @@
 package com.acm431.huzuratlasi.ui.theme
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -7,16 +10,17 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import androidx.navigation.compose.currentBackStackEntryAsState
-import com.acm431.huzuratlasi.viewmodel.AppViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -29,111 +33,130 @@ fun EmergencyScreen(navController: NavController) {
             BottomNavigationBar(navController = navController, currentRoute = currentRoute)
         }
     ) { paddingValues ->
-        // Your EmergencyScreen content
-    }
-}
+        AnimatedVisibility(
+            visible = true,
+            enter = fadeIn(),
+            exit = fadeOut()
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(paddingValues)
+                    .verticalScroll(rememberScrollState())
+                    .padding(16.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                // Header Section
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = CardDefaults.cardColors(
+                        containerColor = MaterialTheme.colorScheme.errorContainer
+                    ),
+                    shape = RoundedCornerShape(16.dp)
+                ) {
+                    Column(
+                        modifier = Modifier.padding(20.dp)
+                    ) {
+                        Text(
+                            text = "Acil Durum",
+                            style = MaterialTheme.typography.headlineMedium,
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.onErrorContainer
+                        )
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Text(
+                            text = "Aşağıdaki numaralardan acil yardım alabilirsiniz",
+                            style = MaterialTheme.typography.bodyLarge,
+                            color = MaterialTheme.colorScheme.onErrorContainer.copy(alpha = 0.7f)
+                        )
+                    }
+                }
 
-@Composable
-fun EmergencyCallButton(
-    title: String,
-    icon: androidx.compose.ui.graphics.vector.ImageVector,
-    phoneNumber: String,
-    onClick: () -> Unit
-) {
-    Button(
-        onClick = onClick,
-        colors = ButtonDefaults.buttonColors(containerColor = Color.Red),
-        modifier = Modifier.fillMaxWidth(),
-        contentPadding = PaddingValues(16.dp)
-    ) {
-        Icon(
-            imageVector = icon,
-            contentDescription = null,
-            modifier = Modifier.size(24.dp)
-        )
-        Spacer(modifier = Modifier.width(8.dp))
-        Column {
-            Text(
-                text = title,
-                style = MaterialTheme.typography.titleMedium
-            )
-            Text(
-                text = phoneNumber,
-                style = MaterialTheme.typography.bodyMedium,
-                color = Color.White.copy(alpha = 0.8f)
-            )
+                // Emergency Cards
+                EmergencyServiceCard(
+                    title = "Acil Yardım",
+                    number = "112",
+                    description = "Ambulans ve Sağlık Hizmetleri",
+                    icon = Icons.Default.LocalHospital,
+                    backgroundColor = Color(0xFFEF5350)
+                )
+
+                EmergencyServiceCard(
+                    title = "Polis İmdat",
+                    number = "155",
+                    description = "Polis ve Güvenlik Hizmetleri",
+                    icon = Icons.Default.LocalPolice,
+                    backgroundColor = Color(0xFF42A5F5)
+                )
+
+                EmergencyServiceCard(
+                    title = "İtfaiye",
+                    number = "110",
+                    description = "Yangın ve Kurtarma Hizmetleri",
+                    icon = Icons.Default.LocalFireDepartment,
+                    backgroundColor = Color(0xFFFF7043)
+                )
+
+                EmergencyServiceCard(
+                    title = "Jandarma İmdat",
+                    number = "156",
+                    description = "Jandarma Acil Yardım Hattı",
+                    icon = Icons.Default.Security,
+                    backgroundColor = Color(0xFF66BB6A)
+                )
+            }
         }
     }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun EmergencyContact(
-    name: String,
-    relation: String,
-    phone: String,
-    onClick: () -> Unit
+private fun EmergencyServiceCard(
+    title: String,
+    number: String,
+    description: String,
+    icon: ImageVector,
+    backgroundColor: Color
 ) {
     Card(
-        onClick = onClick,
         modifier = Modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surface
-        )
+        shape = RoundedCornerShape(16.dp),
+        colors = CardDefaults.cardColors(containerColor = backgroundColor)
     ) {
         Row(
             modifier = Modifier
-                .padding(16.dp)
-                .fillMaxWidth(),
+                .fillMaxWidth()
+                .padding(20.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Icon(
-                imageVector = Icons.Default.Person,
+                imageVector = icon,
                 contentDescription = null,
-                tint = MaterialTheme.colorScheme.primary
+                tint = Color.White,
+                modifier = Modifier.size(32.dp)
             )
+            
             Spacer(modifier = Modifier.width(16.dp))
+            
             Column(modifier = Modifier.weight(1f)) {
                 Text(
-                    text = name,
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Bold
+                    text = title,
+                    style = MaterialTheme.typography.titleLarge,
+                    fontWeight = FontWeight.Bold,
+                    color = Color.White
                 )
                 Text(
-                    text = relation,
+                    text = number,
+                    style = MaterialTheme.typography.headlineMedium,
+                    fontWeight = FontWeight.ExtraBold,
+                    color = Color.White
+                )
+                Text(
+                    text = description,
                     style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
-                )
-                Text(
-                    text = phone,
-                    style = MaterialTheme.typography.bodyMedium
+                    color = Color.White.copy(alpha = 0.8f)
                 )
             }
-            Icon(
-                imageVector = Icons.Default.Phone,
-                contentDescription = null,
-                tint = MaterialTheme.colorScheme.primary
-            )
         }
-    }
-}
-
-@Composable
-fun MedicalInfo(
-    title: String,
-    info: String
-) {
-    Column(
-        modifier = Modifier.padding(vertical = 4.dp)
-    ) {
-        Text(
-            text = title,
-            style = MaterialTheme.typography.titleSmall,
-            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
-        )
-        Text(
-            text = info,
-            style = MaterialTheme.typography.bodyLarge
-        )
     }
 }

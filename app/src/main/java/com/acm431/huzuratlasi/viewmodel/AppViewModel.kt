@@ -60,6 +60,13 @@ class AppViewModel(private val repository: AppRepository) : ViewModel() {
             repository.deleteMedicine(medicine)
         }
     }
+
+    fun logout() {
+        viewModelScope.launch {
+            _currentUser.value = null
+            _medicines.value = emptyList()
+        }
+    }
 }
 
 class AppViewModelFactory(private val repository: AppRepository) : ViewModelProvider.Factory {
