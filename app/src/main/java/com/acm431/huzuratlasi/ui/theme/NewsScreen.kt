@@ -17,92 +17,22 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.navigation.NavHostController
+import androidx.navigation.NavController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import coil.compose.AsyncImage
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun NewsScreen(navController: NavHostController) {
+fun NewsScreen(navController: NavController) {
     val currentRoute = navController.currentBackStackEntryAsState().value?.destination?.route
-    var selectedCategory by remember { mutableStateOf("Tümü") }
     
-    val categories = listOf(
-        "Tümü", "Sağlık", "İlaç", "Hastane", "Araştırma", "Teknoloji"
-    )
-
-    val newsItems = listOf(
-        NewsItem(
-            title = "Yeni Sağlık Teknolojileri",
-            description = "Sağlık sektöründe devrim yaratacak yeni teknolojiler geliştirildi.",
-            imageUrl = "https://example.com/health-tech.jpg",
-            category = "Teknoloji",
-            date = "12 Mart 2024"
-        ),
-        NewsItem(
-            title = "İlaç Sektöründe Önemli Gelişme",
-            description = "Yeni geliştirilen ilaç tedavi sürecini kısaltıyor.",
-            imageUrl = "https://example.com/medicine.jpg",
-            category = "İlaç",
-            date = "11 Mart 2024"
-        ),
-        // Add more news items here
-    )
-
     Scaffold(
         bottomBar = {
             BottomNavigationBar(navController = navController, currentRoute = currentRoute)
         }
     ) { paddingValues ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(paddingValues)
-        ) {
-            // Top Bar
-            SmallTopAppBar(
-                title = { Text("Haberler") },
-                colors = TopAppBarDefaults.smallTopAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.primary,
-                    titleContentColor = Color.White
-                )
-            )
-
-            // Categories
-            LazyRow(
-                modifier = Modifier
-                    .padding(vertical = 8.dp)
-                    .fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                contentPadding = PaddingValues(horizontal = 16.dp)
-            ) {
-                items(categories) { category ->
-                    FilterChip(
-                        selected = selectedCategory == category,
-                        onClick = { selectedCategory = category },
-                        label = { Text(category) },
-                        colors = FilterChipDefaults.filterChipColors(
-                            selectedContainerColor = MaterialTheme.colorScheme.primary,
-                            selectedLabelColor = Color.White
-                        )
-                    )
-                }
-            }
-
-            // News List
-            LazyColumn(
-                modifier = Modifier.fillMaxSize(),
-                contentPadding = PaddingValues(16.dp),
-                verticalArrangement = Arrangement.spacedBy(16.dp)
-            ) {
-                items(newsItems.filter { 
-                    selectedCategory == "Tümü" || it.category == selectedCategory 
-                }) { newsItem ->
-                    NewsCard(newsItem = newsItem)
-                }
-            }
-        }
+        // Your NewsScreen content
     }
 }
 
@@ -167,4 +97,3 @@ data class NewsItem(
     val category: String,
     val date: String
 )
-

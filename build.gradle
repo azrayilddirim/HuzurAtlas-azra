@@ -4,8 +4,18 @@ buildscript {
         mavenCentral()
         gradlePluginPortal()
     }
+    
+    ext {
+        compose_version = '1.5.1'
+        kotlin_version = '1.9.0'
+    }
+    
     dependencies {
         classpath 'com.android.tools.build:gradle:8.1.0'
-        classpath 'org.jetbrains.kotlin:kotlin-gradle-plugin:1.9.0'
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
     }
+}
+
+tasks.register('clean', Delete) {
+    delete rootProject.buildDir
 } 

@@ -75,11 +75,17 @@ import com.acm431.huzuratlasi.ui.theme.Onboarding2
 import com.acm431.huzuratlasi.ui.theme.EmergencyScreen
 import com.acm431.huzuratlasi.ui.theme.LoginPage
 import com.acm431.huzuratlasi.ui.theme.RegisterScreen
+import com.acm431.huzuratlasi.data.AppDatabase
+import com.acm431.huzuratlasi.repository.AppRepository
+import com.acm431.huzuratlasi.viewmodel.AppViewModel
+import com.acm431.huzuratlasi.viewmodel.AppViewModelFactory
+import androidx.lifecycle.ViewModelProvider
 
 @OptIn(ExperimentalMaterial3Api::class)
 class MainActivity : ComponentActivity() {
 
     private lateinit var sharedPreferences: SharedPreferences
+    private lateinit var appViewModel: AppViewModel
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -91,16 +97,25 @@ class MainActivity : ComponentActivity() {
         val isOnboardingSeen = sharedPreferences.getBoolean("isOnboardingSeen", false)
         WindowCompat.setDecorFitsSystemWindows(window, false)
 
+        val database = AppDatabase.getDatabase(applicationContext)
+        val repository = AppRepository(database.userDao(), database.medicineDao())
+        appViewModel = ViewModelProvider(
+            this,
+            AppViewModelFactory(repository)
+        )[AppViewModel::class.java]
+
         // Ana ekranı Compose ile set ediyoruz
         setContent {
-            MainScreen(isOnboardingSeen)
+            MaterialTheme {
+                MainScreen(isOnboardingSeen, appViewModel)
+            }
         }
     }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun MedicineScreen(navController: NavHostController) {
+fun MedicineScreen(navController: NavHostController, viewModel: AppViewModel) {
     val currentRoute = navController.currentBackStackEntry?.destination?.route
     
     Scaffold(
@@ -108,30 +123,30 @@ fun MedicineScreen(navController: NavHostController) {
             BottomNavigationBar(navController = navController, currentRoute = currentRoute)
         }
     ) { paddingValues ->
-        // This is where we call the actual medicine screen content
         MedicineScreenContent(
             navController = navController,
+            viewModel = viewModel,
             modifier = Modifier.padding(paddingValues)
         )
     }
 }
 
 @Composable
-fun MainScreen(isOnboardingSeen: Boolean) {
+fun MainScreen(isOnboardingSeen: Boolean, appViewModel: AppViewModel) {
     val navController = rememberNavController()
     val systemUiController = rememberSystemUiController()
 
     Column(modifier = Modifier.fillMaxSize()) {
         NavHost(
             navController = navController,
-            startDestination = if (isOnboardingSeen) "home" else "onboarding1"
+            startDestination = if (isOnboardingSeen) "login" else "onboarding1"
         ) {
             composable("onboarding1") { Onboarding1(navController) }
             composable("onboarding2") { Onboarding2(navController) }
-            composable("login") { LoginPage(navController) }
-            composable("register") { RegisterScreen(navController) }
-            composable("home") { HomeScreen(navController) }
-            composable("medicine") { MedicineScreen(navController) }
+            composable("login") { LoginPage(navController, appViewModel) }
+            composable("register") { RegisterScreen(navController, appViewModel) }
+            composable("home") { HomeScreen(navController, appViewModel) }
+            composable("medicine") { MedicineScreen(navController, appViewModel) }
             composable("emergency") { EmergencyScreen(navController) }
             composable("news") { NewsScreen(navController) }
             composable("profile") { ProfileScreen(navController) }

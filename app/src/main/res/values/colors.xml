@@ -7,14 +7,6 @@
     <color name="teal_700">#FF018786</color>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
-    <color name="colorPrimary">#6200EE</color>
-    <color name="colorPrimaryVariant">#3700B3</color>
-    <color name="colorOnPrimary">#FFFFFF</color>
-    <color name="colorSecondary">#03DAC6</color>
-    <color name="colorOnSecondary">#000000</color>
-    <color name="light_background">#F5F5F5</color>
-    <color name="primaryColor">#6200EE</color> <!-- Rengi ihtiyacınıza göre değiştirebilirsiniz -->
-
-
-
+    <color name="light_background">#FFFFFFFF</color>
+    <color name="primaryColor">#FF6200EE</color>
 </resources>

@@ -16,11 +16,12 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.acm431.huzuratlasi.data.Medicine
 import com.acm431.huzuratlasi.data.sampleMedicines
+import com.acm431.huzuratlasi.viewmodel.AppViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun MedicineScreenContent(navController: NavController, modifier: Modifier = Modifier) {
-    var medicines by remember { mutableStateOf(sampleMedicines) }
+fun MedicineScreenContent(navController: NavController, viewModel: AppViewModel, modifier: Modifier = Modifier) {
+    val medicines by viewModel.medicines.collectAsState()
     var medicineName by remember { mutableStateOf("") }
     var dosage by remember { mutableStateOf("") }
     var frequency by remember { mutableStateOf("") }
@@ -78,14 +79,12 @@ fun MedicineScreenContent(navController: NavController, modifier: Modifier = Mod
             onClick = {
                 if (medicineName.isNotBlank() && dosage.isNotBlank() && 
                     frequency.isNotBlank() && time.isNotBlank()) {
-                    val newMedicine = Medicine(
-                        id = medicines.size + 1,
+                    viewModel.addMedicine(
                         name = medicineName,
                         dosage = dosage,
                         frequency = frequency,
                         time = time
                     )
-                    medicines = medicines + newMedicine
                     // Clear form
                     medicineName = ""
                     dosage = ""
@@ -135,7 +134,7 @@ fun MedicineScreenContent(navController: NavController, modifier: Modifier = Mod
                         }
                         IconButton(
                             onClick = {
-                                medicines = medicines.filter { it.id != medicine.id }
+                                viewModel.deleteMedicine(medicine)
                             }
                         ) {
                             Icon(

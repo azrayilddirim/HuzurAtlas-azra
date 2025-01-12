@@ -16,130 +16,96 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.acm431.huzuratlasi.R
+import com.acm431.huzuratlasi.viewmodel.AppViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun RegisterScreen(navController: NavController) {
+fun RegisterScreen(navController: NavController, viewModel: AppViewModel) {
     var username by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
-    var confirmPassword by remember { mutableStateOf("") }
+    var errorMessage by remember { mutableStateOf<String?>(null) }
 
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color(0xFFF8FFF4))
             .padding(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Top
+        verticalArrangement = Arrangement.Center
     ) {
-        Spacer(modifier = Modifier.height(48.dp))
-
-        // Logo
-        Image(
-            painter = painterResource(id = R.drawable.logo),
-            contentDescription = "App Logo",
-            modifier = Modifier
-                .size(120.dp)
-                .padding(8.dp)
-        )
-
-        // App Name
         Text(
-            text = "Huzur Atlası",
-            fontSize = 28.sp,
+            text = "Kayıt Ol",
+            style = MaterialTheme.typography.headlineMedium,
             fontWeight = FontWeight.Bold,
-            color = Color(0xFFD32F2F),
-            modifier = Modifier.padding(vertical = 16.dp)
+            modifier = Modifier.padding(bottom = 32.dp)
         )
 
-        Spacer(modifier = Modifier.height(32.dp))
-
-        // Register Card
-        Card(
+        OutlinedTextField(
+            value = username,
+            onValueChange = { username = it },
+            label = { Text("Kullanıcı Adı") },
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 16.dp),
-            shape = RoundedCornerShape(16.dp)
-        ) {
-            Column(
-                modifier = Modifier.padding(24.dp),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                OutlinedTextField(
-                    value = username,
-                    onValueChange = { username = it },
-                    label = { Text("Kullanıcı Adı") },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(bottom = 16.dp),
-                    shape = RoundedCornerShape(8.dp)
-                )
+                .padding(vertical = 8.dp)
+        )
 
-                OutlinedTextField(
-                    value = email,
-                    onValueChange = { email = it },
-                    label = { Text("E-posta") },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(bottom = 16.dp),
-                    shape = RoundedCornerShape(8.dp)
-                )
+        OutlinedTextField(
+            value = email,
+            onValueChange = { email = it },
+            label = { Text("E-posta") },
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(vertical = 8.dp)
+        )
 
-                OutlinedTextField(
-                    value = password,
-                    onValueChange = { password = it },
-                    label = { Text("Şifre") },
-                    visualTransformation = PasswordVisualTransformation(),
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(bottom = 16.dp),
-                    shape = RoundedCornerShape(8.dp)
-                )
+        OutlinedTextField(
+            value = password,
+            onValueChange = { password = it },
+            label = { Text("Şifre") },
+            visualTransformation = PasswordVisualTransformation(),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(vertical = 8.dp)
+        )
 
-                OutlinedTextField(
-                    value = confirmPassword,
-                    onValueChange = { confirmPassword = it },
-                    label = { Text("Şifre Tekrar") },
-                    visualTransformation = PasswordVisualTransformation(),
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(bottom = 24.dp),
-                    shape = RoundedCornerShape(8.dp)
-                )
-
-                Button(
-                    onClick = { 
-                        // Handle registration and navigate to home
-                        navController.navigate("home")
-                    },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(50.dp),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = Color(0xFFD32F2F)
-                    ),
-                    shape = RoundedCornerShape(8.dp)
-                ) {
-                    Text(
-                        "Kayıt Ol",
-                        fontSize = 16.sp,
-                        fontWeight = FontWeight.Bold
-                    )
-                }
-            }
+        if (errorMessage != null) {
+            Text(
+                text = errorMessage!!,
+                color = Color.Red,
+                modifier = Modifier.padding(vertical = 8.dp)
+            )
         }
 
-        Spacer(modifier = Modifier.weight(1f))
-
-        // Login Button
-        TextButton(
-            onClick = { navController.navigateUp() }
+        Button(
+            onClick = {
+                viewModel.register(username, email, password) { result ->
+                    result.fold(
+                        onSuccess = {
+                            navController.navigate("login") {
+                                popUpTo("register") { inclusive = true }
+                            }
+                        },
+                        onFailure = { exception ->
+                            errorMessage = when {
+                                exception.message?.contains("Email already registered") == true ->
+                                    "Bu e-posta adresi zaten kayıtlı"
+                                else -> "Kayıt olurken bir hata oluştu"
+                            }
+                        }
+                    )
+                }
+            },
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(vertical = 16.dp)
         ) {
-            Text(
-                "Zaten hesabınız var mı? Giriş yapın",
-                color = Color(0xFF666666)
-            )
+            Text("Kayıt Ol")
+        }
+
+        TextButton(
+            onClick = { navController.navigate("login") }
+        ) {
+            Text("Zaten hesabınız var mı? Giriş yapın")
         }
     }
 } 

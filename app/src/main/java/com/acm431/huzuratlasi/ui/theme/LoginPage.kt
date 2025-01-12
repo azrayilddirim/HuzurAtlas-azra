@@ -1,4 +1,3 @@
-
 package com.acm431.huzuratlasi.ui.theme
 
 import androidx.compose.foundation.Image
@@ -6,43 +5,47 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
 import com.acm431.huzuratlasi.R
-import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import com.acm431.huzuratlasi.viewmodel.AppViewModel
 
-
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun LoginScreen() {
-    // Metinleri tutmak için state'ler
-    var name by remember { mutableStateOf("") }
-    var phoneNumber by remember { mutableStateOf("") }
+fun LoginPage(navController: NavController, viewModel: AppViewModel) {
+    var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
-    var confirmPassword by remember { mutableStateOf("") }
+    var errorMessage by remember { mutableStateOf<String?>(null) }
+
+    // Add LaunchedEffect to observe currentUser
+    val currentUser by viewModel.currentUser.collectAsState()
+    
+    LaunchedEffect(currentUser) {
+        if (currentUser != null) {
+            navController.navigate("home") {
+                popUpTo("login") { inclusive = true }
+            }
+        }
+    }
 
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(color = Color(0xFFF8FFF4)) // Açık arka plan rengi
+            .background(color = Color(0xFFF8FFF4))
             .padding(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         // Logo
         Image(
-            painter = painterResource(id = R.drawable.logo), // Logo kaynağını değiştir
+            painter = painterResource(id = R.drawable.logo),
             contentDescription = "Uygulama Logosu",
             modifier = Modifier
                 .size(150.dp)
@@ -54,7 +57,7 @@ fun LoginScreen() {
             text = "Huzur Atlası",
             fontSize = 24.sp,
             fontWeight = FontWeight.Bold,
-            color = Color(0xFFD32F2F) // Kırmızı renk
+            color = Color(0xFFD32F2F)
         )
 
         Text(
@@ -65,112 +68,81 @@ fun LoginScreen() {
         )
 
         // Giriş Formu
-        Column(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            OutlinedTextField(
-                value = name,
-                onValueChange = { name = it }, // state güncelleme
-                label = { Text("İsim Soyisim") },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 8.dp),
-                leadingIcon = {
-                    Icon(
-                        painter = painterResource(id = R.drawable.person),
-                        contentDescription = "Kullanıcı İkonu"
-                    )
-                }
-            )
+        OutlinedTextField(
+            value = email,
+            onValueChange = { email = it },
+            label = { Text("E-posta") },
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(vertical = 8.dp),
+            leadingIcon = {
+                Icon(
+                    painter = painterResource(id = R.drawable.person),
+                    contentDescription = "E-posta İkonu"
+                )
+            }
+        )
 
-            OutlinedTextField(
-                value = phoneNumber,
-                onValueChange = { phoneNumber = it }, // state güncelleme
-                label = { Text("Telefon Numarası") },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 8.dp),
-                leadingIcon = {
-                    Icon(
-                        painter = painterResource(id = R.drawable.telefonikonyeni),
-                        contentDescription = "Telefon İkonu"
-                    )
-                }
-            )
+        OutlinedTextField(
+            value = password,
+            onValueChange = { password = it },
+            label = { Text("Şifre") },
+            visualTransformation = PasswordVisualTransformation(),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(vertical = 8.dp),
+            leadingIcon = {
+                Icon(
+                    painter = painterResource(id = R.drawable.passwordicon24),
+                    contentDescription = "Şifre İkonu"
+                )
+            }
+        )
 
-            OutlinedTextField(
-                value = password,
-                onValueChange = { password = it }, // state güncelleme
-                label = { Text("Şifre") },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 8.dp),
-                leadingIcon = {
-                    Icon(
-                        painter = painterResource(id = R.drawable.passwordicon24),
-                        contentDescription = "Şifre İkonu"
-                    )
-                }
-            )
-
-            OutlinedTextField(
-                value = confirmPassword,
-                onValueChange = { confirmPassword = it }, // state güncelleme
-                label = { Text("Şifre Tekrar") },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 8.dp),
-                leadingIcon = {
-                    Icon(
-                        painter = painterResource(id = R.drawable.passwordicon24),
-                        contentDescription = "Şifre Tekrar İkonu"
-                    )
-                }
+        if (errorMessage != null) {
+            Text(
+                text = errorMessage!!,
+                color = Color.Red,
+                modifier = Modifier.padding(vertical = 8.dp)
             )
         }
 
-        // Kayıt Ol Butonu
+        // Giriş Yap Butonu
         Button(
-            onClick = { /* Kayıt işlemi */ },
+            onClick = {
+                if (email.isNotBlank() && password.isNotBlank()) {
+                    viewModel.login(email, password) { result ->
+                        result.onFailure { exception ->
+                            errorMessage = when (exception.message) {
+                                "Invalid credentials" -> "Geçersiz e-posta veya şifre"
+                                else -> "Giriş yapılırken bir hata oluştu"
+                            }
+                        }
+                    }
+                } else {
+                    errorMessage = "Lütfen e-posta ve şifre alanlarını doldurun"
+                }
+            },
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(vertical = 16.dp),
             colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFD32F2F)),
             shape = RoundedCornerShape(8.dp)
         ) {
-            Text(text = "Kayıt Ol", color = Color.White)
+            Text(text = "Giriş Yap", color = Color.White)
         }
 
-        // Alternatif Giriş
-        Text(
-            text = "veya",
-            color = Color.Gray,
-            modifier = Modifier.padding(vertical = 8.dp)
-        )
+        Spacer(modifier = Modifier.weight(1f))
 
-        Button(
-            onClick = { /* Google ile giriş işlemi */ },
-            modifier = Modifier.fillMaxWidth(),
-            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF4285F4)), // Google mavi renk
-            shape = RoundedCornerShape(8.dp)
+        // Kayıt Ol Butonu
+        TextButton(
+            onClick = { navController.navigate("register") }
         ) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Icon(
-                    painter = painterResource(id = R.drawable.accountcircle), // Google ikonu
-                    contentDescription = "Google İkonu",
-                    tint = Color.White
-                )
-                Spacer(modifier = Modifier.width(8.dp))
-                Text(text = "Google ile oturum açın", color = Color.White)
-            }
+            Text(
+                "Hesabınız yok mu? Kayıt Olun",
+                color = Color(0xFF666666)
+            )
         }
     }
-}
-
-@Preview(showSystemUi = true)
-@Composable
-fun LoginScreenPreview() {
-    LoginScreen()
 }
 
