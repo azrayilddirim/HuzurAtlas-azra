@@ -51,4 +51,8 @@ class AppRepository(
     suspend fun updateMedicine(medicine: Medicine) {
         medicineDao.updateMedicine(medicine)
     }
+
+    suspend fun updateUser(user: User) {
+        userDao.updateUser(user)
+    }
 } 

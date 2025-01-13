@@ -67,6 +67,29 @@ class AppViewModel(private val repository: AppRepository) : ViewModel() {
             _medicines.value = emptyList()
         }
     }
+
+    fun updateUsername(newUsername: String, callback: (Result<Unit>) -> Unit) {
+        viewModelScope.launch {
+            try {
+                // Get current user
+                val currentUserValue = _currentUser.value 
+                    ?: throw Exception("No user logged in")
+                
+                // Create updated user object
+                val updatedUser = currentUserValue.copy(username = newUsername)
+                
+                // Update user in Room database
+                repository.updateUser(updatedUser)
+                
+                // Update the local state
+                _currentUser.value = updatedUser
+                
+                callback(Result.success(Unit))
+            } catch (e: Exception) {
+                callback(Result.failure(e))
+            }
+        }
+    }
 }
 
 class AppViewModelFactory(private val repository: AppRepository) : ViewModelProvider.Factory {

@@ -200,12 +200,23 @@ fun ProfileScreen(navController: NavController, viewModel: AppViewModel) {
             EditProfileDialog(
                 onDismiss = { showEditDialog = false },
                 onConfirm = { newUsername ->
-                    // Handle profile edit
-                    scope.launch {
-                        snackbarHostState.showSnackbar("Profil güncellendi!")
+                    viewModel.updateUsername(newUsername) { result ->
+                        result.fold(
+                            onSuccess = {
+                                scope.launch {
+                                    snackbarHostState.showSnackbar("Kullanıcı adı güncellendi")
+                                }
+                            },
+                            onFailure = { exception ->
+                                scope.launch {
+                                    snackbarHostState.showSnackbar("Güncelleme başarısız: ${exception.message}")
+                                }
+                            }
+                        )
                     }
                     showEditDialog = false
-                }
+                },
+                currentUsername = currentUser?.username ?: ""
             )
         }
 
@@ -228,9 +239,10 @@ fun ProfileScreen(navController: NavController, viewModel: AppViewModel) {
 @Composable
 fun EditProfileDialog(
     onDismiss: () -> Unit,
-    onConfirm: (String) -> Unit
+    onConfirm: (String) -> Unit,
+    currentUsername: String
 ) {
-    var username by remember { mutableStateOf("") }
+    var username by remember { mutableStateOf(currentUsername) }
 
     AlertDialog(
         onDismissRequest = onDismiss,
@@ -239,11 +251,18 @@ fun EditProfileDialog(
             OutlinedTextField(
                 value = username,
                 onValueChange = { username = it },
-                label = { Text("Yeni Kullanıcı Adı") }
+                label = { Text("Kullanıcı Adı") },
+                singleLine = true
             )
         },
         confirmButton = {
-            TextButton(onClick = { onConfirm(username) }) {
+            TextButton(
+                onClick = { 
+                    if (username.isNotBlank()) {
+                        onConfirm(username)
+                    }
+                }
+            ) {
                 Text("Kaydet")
             }
         },
