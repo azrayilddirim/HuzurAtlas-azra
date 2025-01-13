@@ -3,6 +3,7 @@ package com.acm431.huzuratlasi.ui.theme
 import android.content.Intent
 import android.net.Uri
 import androidx.compose.animation.*
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -14,16 +15,20 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.compose.currentBackStackEntryAsState
+import com.acm431.huzuratlasi.R
 
 data class EmergencyContact(
     val name: String,
     val number: String,
-    val description: String
+    val description: String,
+    val icon: Int // Resource ID for the icon
 )
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -36,27 +41,32 @@ fun EmergencyScreen(navController: NavController) {
         EmergencyContact(
             "Acil Çağrı Merkezi",
             "112",
-            "Ambulans, İtfaiye, Polis"
+            "Ambulans, İtfaiye, Polis",
+            R.drawable.ic_emergency_112
         ),
         EmergencyContact(
             "Polis İmdat",
             "155",
-            "Güvenlik durumları için"
+            "Güvenlik durumları için",
+            R.drawable.ic_police_155
         ),
         EmergencyContact(
             "Jandarma İmdat",
             "156",
-            "Kırsal bölgeler için"
+            "Kırsal bölgeler için",
+            R.drawable.ic_gendarme_156
         ),
         EmergencyContact(
             "AFAD",
             "122",
-            "Afet ve Acil Durum"
+            "Afet ve Acil Durum",
+            R.drawable.ic_afad_122
         ),
         EmergencyContact(
             "Alo Sağlık",
             "184",
-            "Sağlık Danışma Hattı"
+            "Sağlık Danışma Hattı",
+            R.drawable.ic_health_184
         )
     )
 
@@ -125,23 +135,37 @@ fun EmergencyContactCard(
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Column {
-                Text(
-                    text = contact.name,
-                    style = MaterialTheme.typography.titleLarge,
-                    fontWeight = FontWeight.Bold
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.weight(1f)
+            ) {
+                // Emergency service icon
+                Image(
+                    painter = painterResource(id = contact.icon),
+                    contentDescription = contact.name,
+                    modifier = Modifier
+                        .size(48.dp)
+                        .padding(end = 16.dp)
                 )
-                Text(
-                    text = contact.description,
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
-                )
+                
+                Column {
+                    Text(
+                        text = contact.name,
+                        style = MaterialTheme.typography.titleLarge,
+                        fontWeight = FontWeight.Bold
+                    )
+                    Text(
+                        text = contact.description,
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
+                    )
+                }
             }
             
             Button(
                 onClick = onCallClick,
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = MaterialTheme.colorScheme.error
+                    containerColor = AccentRed
                 ),
                 shape = RoundedCornerShape(8.dp)
             ) {
