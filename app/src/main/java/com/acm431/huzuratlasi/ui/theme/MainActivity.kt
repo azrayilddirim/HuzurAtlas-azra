@@ -114,8 +114,14 @@ class MainActivity : ComponentActivity() {
 
         // Ana ekranı Compose ile set ediyoruz
         setContent {
-            MaterialTheme {
-                MainScreen(isOnboardingSeen, appViewModel)
+            HuzurAtlasiTheme {
+                // Surface to apply background color
+                Surface(
+                    modifier = Modifier.fillMaxSize(),
+                    color = MaterialTheme.colorScheme.background
+                ) {
+                    MainScreen(isOnboardingSeen, appViewModel)
+                }
             }
         }
     }

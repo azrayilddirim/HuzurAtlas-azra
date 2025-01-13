@@ -1,10 +1,12 @@
 package com.acm431.huzuratlasi.ui.theme
 
+import android.widget.Toast
 import androidx.compose.animation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.clickable
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
@@ -22,6 +24,19 @@ import androidx.navigation.NavController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import com.acm431.huzuratlasi.viewmodel.AppViewModel
 import kotlinx.coroutines.launch
+
+// Add these data classes to store settings and notification preferences
+data class UserSettings(
+    var darkMode: Boolean = false,
+    var notifications: Boolean = true,
+    var language: String = "Türkçe"
+)
+
+data class NotificationPreferences(
+    var medicineReminders: Boolean = true,
+    var healthNews: Boolean = true,
+    var systemNotifications: Boolean = true
+)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -240,8 +255,13 @@ fun EditProfileDialog(
     )
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SettingsDialog(onDismiss: () -> Unit) {
+    var settings by remember { mutableStateOf(UserSettings()) }
+    val scope = rememberCoroutineScope()
+    val context = LocalContext.current
+
     AlertDialog(
         onDismissRequest = onDismiss,
         title = { Text("Ayarlar") },
@@ -249,28 +269,88 @@ fun SettingsDialog(onDismiss: () -> Unit) {
             Column {
                 ListItem(
                     headlineContent = { Text("Karanlık Mod") },
-                    trailingContent = { Switch(checked = false, onCheckedChange = {}) }
+                    trailingContent = { 
+                        Switch(
+                            checked = settings.darkMode,
+                            onCheckedChange = { newValue ->
+                                settings = settings.copy(darkMode = newValue)
+                                // Save the setting
+                                scope.launch {
+                                    // You would typically save this to SharedPreferences or your database
+                                    Toast.makeText(
+                                        context,
+                                        "Karanlık mod ${if (newValue) "açıldı" else "kapatıldı"}",
+                                        Toast.LENGTH_SHORT
+                                    ).show()
+                                }
+                            }
+                        )
+                    }
                 )
                 ListItem(
                     headlineContent = { Text("Bildirimler") },
-                    trailingContent = { Switch(checked = true, onCheckedChange = {}) }
+                    trailingContent = { 
+                        Switch(
+                            checked = settings.notifications,
+                            onCheckedChange = { newValue ->
+                                settings = settings.copy(notifications = newValue)
+                                scope.launch {
+                                    Toast.makeText(
+                                        context,
+                                        "Bildirimler ${if (newValue) "açıldı" else "kapatıldı"}",
+                                        Toast.LENGTH_SHORT
+                                    ).show()
+                                }
+                            }
+                        )
+                    }
                 )
                 ListItem(
                     headlineContent = { Text("Dil") },
-                    supportingContent = { Text("Türkçe") }
+                    supportingContent = { Text(settings.language) },
+                    modifier = Modifier.clickable {
+                        // Show language selection dialog
+                        Toast.makeText(
+                            context,
+                            "Dil seçenekleri yakında eklenecek",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    }
                 )
             }
         },
         confirmButton = {
+            TextButton(
+                onClick = {
+                    scope.launch {
+                        // Save all settings
+                        Toast.makeText(
+                            context,
+                            "Ayarlar kaydedildi",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                        onDismiss()
+                    }
+                }
+            ) {
+                Text("Kaydet")
+            }
+        },
+        dismissButton = {
             TextButton(onClick = onDismiss) {
-                Text("Tamam")
+                Text("İptal")
             }
         }
     )
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun NotificationsDialog(onDismiss: () -> Unit) {
+    var preferences by remember { mutableStateOf(NotificationPreferences()) }
+    val scope = rememberCoroutineScope()
+    val context = LocalContext.current
+
     AlertDialog(
         onDismissRequest = onDismiss,
         title = { Text("Bildirimler") },
@@ -278,21 +358,83 @@ fun NotificationsDialog(onDismiss: () -> Unit) {
             Column {
                 ListItem(
                     headlineContent = { Text("İlaç Hatırlatıcıları") },
-                    trailingContent = { Switch(checked = true, onCheckedChange = {}) }
+                    supportingContent = { Text("İlaç alma zamanlarında bildirim al") },
+                    trailingContent = { 
+                        Switch(
+                            checked = preferences.medicineReminders,
+                            onCheckedChange = { newValue ->
+                                preferences = preferences.copy(medicineReminders = newValue)
+                                scope.launch {
+                                    Toast.makeText(
+                                        context,
+                                        "İlaç hatırlatıcıları ${if (newValue) "açıldı" else "kapatıldı"}",
+                                        Toast.LENGTH_SHORT
+                                    ).show()
+                                }
+                            }
+                        )
+                    }
                 )
                 ListItem(
                     headlineContent = { Text("Sağlık Haberleri") },
-                    trailingContent = { Switch(checked = true, onCheckedChange = {}) }
+                    supportingContent = { Text("Güncel sağlık haberlerinden haberdar ol") },
+                    trailingContent = { 
+                        Switch(
+                            checked = preferences.healthNews,
+                            onCheckedChange = { newValue ->
+                                preferences = preferences.copy(healthNews = newValue)
+                                scope.launch {
+                                    Toast.makeText(
+                                        context,
+                                        "Sağlık haberleri bildirimleri ${if (newValue) "açıldı" else "kapatıldı"}",
+                                        Toast.LENGTH_SHORT
+                                    ).show()
+                                }
+                            }
+                        )
+                    }
                 )
                 ListItem(
                     headlineContent = { Text("Sistem Bildirimleri") },
-                    trailingContent = { Switch(checked = true, onCheckedChange = {}) }
+                    supportingContent = { Text("Uygulama güncellemeleri ve önemli bildirimler") },
+                    trailingContent = { 
+                        Switch(
+                            checked = preferences.systemNotifications,
+                            onCheckedChange = { newValue ->
+                                preferences = preferences.copy(systemNotifications = newValue)
+                                scope.launch {
+                                    Toast.makeText(
+                                        context,
+                                        "Sistem bildirimleri ${if (newValue) "açıldı" else "kapatıldı"}",
+                                        Toast.LENGTH_SHORT
+                                    ).show()
+                                }
+                            }
+                        )
+                    }
                 )
             }
         },
         confirmButton = {
+            TextButton(
+                onClick = {
+                    scope.launch {
+                        // Save notification preferences
+                        Toast.makeText(
+                            context,
+                            "Bildirim ayarları kaydedildi",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                        onDismiss()
+                    }
+                }
+            ) {
+                Text("Kaydet")
+            }
+        },
+        dismissButton = {
             TextButton(onClick = onDismiss) {
-                Text("Tamam")
+                Text("İptal")
             }
         }
     )
