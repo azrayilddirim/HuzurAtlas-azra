@@ -45,7 +45,7 @@ Designed with simplicity and accessibility in mind, HuzurAtlas helps users stay 
 
 ## 🏫 Course Info
 
-> **CIS11ACM431 – Programming Mobile Devices**  
+> **ACM431 – Programming Mobile Devices**  
 > Yeditepe University, 2024
 
 ---
